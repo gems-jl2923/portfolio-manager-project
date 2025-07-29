@@ -1,17 +1,27 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
+
 const app = express();
+const PORT = 3000;
 
-// Serve static assets from 'public' folder
-app.use(express.static(path.join(__dirname, 'public')));
+// 提供静态 HTML 页面
+app.use(express.static(path.join(__dirname, 'views')));
 
-// Serve HTML from 'views/index.html'
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'index.html'));
+// API 路由，提供净资产数据
+app.get('/api/networth', (req, res) => {
+    const filePath = path.join(__dirname, 'data', 'networth.json');
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) {
+            res.status(500).json({ error: 'Failed to read data' });
+        } else {
+            const parsedData = JSON.parse(data);
+            res.json(parsedData);
+        }
+    });
 });
 
-// Start server
-const PORT = process.env.PORT || 3000;
+// 启动服务器
 app.listen(PORT, () => {
-  console.log(`✅ Server is running at http://localhost:${PORT}`);
+    console.log(`Server is running at http://localhost:${PORT}`);
 });
