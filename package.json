@@ -11,6 +11,8 @@
   "description": "",
   "dependencies": {
     "express": "^5.1.0",
-    "mysql2": "^3.14.2"
+    "finnhub": "^2.0.7",
+    "mysql2": "^3.14.2",
+    "yahoo-finance2": "^2.13.3"
   }
 }
