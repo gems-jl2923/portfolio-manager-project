@@ -128,10 +128,18 @@
       const previousNetWorth = netWorthValues.at(-2);
       const difference = latestNetWorth - previousNetWorth;
 
-      document.getElementById('networth-today').textContent = '$' + latestNetWorth.toLocaleString();
-      const changeElem = document.getElementById('networth-change');
-      changeElem.textContent = `${difference >= 0 ? '+' : '-'} $${Math.abs(difference).toLocaleString()} (1 Day)`;
-      changeElem.classList.add(difference >= 0 ? 'text-green-500' : 'text-red-500');
+      document.getElementById('networth-today').textContent = '$' + latestNetWorth.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+    
+    const changeElem = document.getElementById('networth-change');
+    changeElem.textContent = `${difference >= 0 ? '+' : '-'} $${Math.abs(difference).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    })} (1 Day)`;
+    changeElem.classList.add(difference >= 0 ? 'text-green-500' : 'text-red-500');
+    
 
       const ctx = document.getElementById('netWorthChart').getContext('2d');
       new Chart(ctx, {
