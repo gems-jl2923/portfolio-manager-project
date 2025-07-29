@@ -43,6 +43,39 @@ exports.getStockInfo = async (req, res) => {
   };
 
 
+exports.buyStock = async (req, res) => {
+    const { symbol, shares } = req.body;
+
+    if (!symbol || typeof shares !== 'number' || shares <= 0) {
+        return res.status(400).json({ error: 'Invalid parameters: symbol or shares' });
+      }
+    
+    try{
+        const quoteRes = await fetch(QUOTE_API(symbol));
+        const quoteData = await quoteRes.json();
+
+        if (!quoteData || typeof quoteData.c !== 'number') {
+            return res.status(400).json({ error: `Failed to get price for ${symbol}` });
+          }
+      
+        const currentPrice = quoteData.c;
+        const totalValue = (currentPrice * shares).toFixed(2);
+
+        const [result] = await pool.query(
+            'INSERT INTO investments (name, shares, total_value) VALUES (?, ?, ?)',
+            [symbol, shares, totalValue]
+        );
+
+        return res.status(201).json({
+            success: true,
+            message: `Purchased ${shares} shares of ${symbol} at $${currentPrice}`,
+            investment_id: result.insertId
+          });
+    } catch (error) {
+        console.error('Buy stock failed:', error);
+        return res.status(500).json({ error: 'Failed to buy stock' });
+    }
+}
 
 
 // exports.getStockList = async (req, res) => {
