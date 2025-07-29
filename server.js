@@ -1,27 +1,35 @@
 const express = require('express');
+const mysql = require('mysql2');
 const path = require('path');
-const fs = require('fs');
-
 const app = express();
 const PORT = 3000;
 
-// 提供静态 HTML 页面
+// 配置静态文件路径
 app.use(express.static(path.join(__dirname, 'views')));
 
-// API 路由，提供净资产数据
-app.get('/api/networth', (req, res) => {
-    const filePath = path.join(__dirname, 'data', 'networth.json');
-    fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-            res.status(500).json({ error: 'Failed to read data' });
-        } else {
-            const parsedData = JSON.parse(data);
-            res.json(parsedData);
-        }
-    });
+// 创建 MySQL 连接池
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: 'n3u3da!',
+    database: 'portfolio'
 });
 
-// 启动服务器
+// Net Worth API
+app.get('/api/networth', (req, res) => {
+    pool.query(
+        'SELECT date, net_worth FROM net_worth ORDER BY date ASC',
+        (err, results) => {
+            if (err) {
+                console.error('MySQL query error:', err);
+                return res.status(500).json({ error: 'Database error' });
+            }
+            res.json(results);
+        }
+    );
+});
+
+// 启动服务
 app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });

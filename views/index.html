@@ -197,70 +197,72 @@
         const formattedDiff = (difference >= 0 ? '+ $' : '- $') +
             Math.abs(difference).toLocaleString(undefined, { maximumFractionDigits: 2 });
 
-        // 替换原先的 mock data 生成逻辑
-        document.addEventListener("DOMContentLoaded", () => {
-            fetch('/api/networth')
-                .then(res => res.json())
-                .then(data => {
-                    const labels = data.map(item => {
-                        const date = new Date(item.date);
-                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    });
+        document.addEventListener("DOMContentLoaded", async () => {
+            const response = await fetch('/api/networth');
+            const backendData = await response.json();
 
-                    const netWorthValues = data.map(item => item.net_worth);
-                    const latestNetWorth = netWorthValues[netWorthValues.length - 1];
-                    const previousNetWorth = netWorthValues[netWorthValues.length - 2];
-                    const difference = latestNetWorth - previousNetWorth;
+            const labels = backendData.map(item => {
+                const date = new Date(item.date);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
 
-                    document.getElementById('networth-today').textContent =
-                        '$' + latestNetWorth.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            const netWorthValues = backendData.map(item => item.net_worth);
 
-                    const changeElem = document.getElementById('networth-change');
-                    changeElem.textContent =
-                        `${difference >= 0 ? '+' : '-'} $${Math.abs(difference).toLocaleString(undefined, { maximumFractionDigits: 2 })} (1 Day)`;
-                    changeElem.classList.add(difference >= 0 ? 'text-green-500' : 'text-red-500');
+            const latestNetWorth = netWorthValues[netWorthValues.length - 1];
+            const previousNetWorth = netWorthValues[netWorthValues.length - 2];
+            const difference = latestNetWorth - previousNetWorth;
 
-                    const ctx = document.getElementById('netWorthChart').getContext('2d');
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels,
-                            datasets: [{
-                                label: 'Net Worth ($)',
-                                data: netWorthValues,
-                                fill: true,
-                                borderColor: '#3B82F6',
-                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                                tension: 0.3,
-                                pointRadius: 0,
-                                borderWidth: 2
-                            }]
+            const formattedToday = '$' + latestNetWorth.toLocaleString(undefined, { maximumFractionDigits: 2 });
+            const formattedDiff = (difference >= 0 ? '+ $' : '- $') +
+                Math.abs(difference).toLocaleString(undefined, { maximumFractionDigits: 2 });
+
+            document.getElementById('networth-today').textContent = formattedToday;
+            const changeElem = document.getElementById('networth-change');
+            changeElem.textContent = `${formattedDiff} (1 Day)`;
+            changeElem.classList.add(difference >= 0 ? 'text-green-500' : 'text-red-500');
+
+            // 渲染图表
+            const ctx = document.getElementById('netWorthChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Net Worth ($)',
+                        data: netWorthValues,
+                        fill: true,
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.3,
+                        pointRadius: 0,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { maxTicksLimit: 6, color: '#6B7280' },
+                            grid: { display: false }
                         },
-                        options: {
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: { mode: 'index', intersect: false }
+                        y: {
+                            ticks: {
+                                callback: value => `$${(value / 1000).toFixed(0)}k`,
+                                color: '#6B7280'
                             },
-                            scales: {
-                                x: {
-                                    ticks: { maxTicksLimit: 6, color: '#6B7280' },
-                                    grid: { display: false }
-                                },
-                                y: {
-                                    ticks: {
-                                        callback: value => `$${(value / 1000).toFixed(0)}k`,
-                                        color: '#6B7280'
-                                    },
-                                    grid: {
-                                        color: '#E5E7EB',
-                                        drawBorder: false
-                                    }
-                                }
+                            grid: {
+                                color: '#E5E7EB',
+                                drawBorder: false
                             }
                         }
-                    });
-                });
+                    }
+                }
+            });
         });
+
 
     </script>
 </body>
