@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db/db'); // 使用的是 mysql2/promise
+const db = require('../config/db'); // 使用的是 mysql2/promise
 
 // 获取 Cash 数据
 router.get('/cash', async (req, res) => {
