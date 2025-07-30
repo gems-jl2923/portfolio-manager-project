@@ -59,19 +59,40 @@ exports.buyStock = async (req, res) => {
           }
       
         const currentPrice = quoteData.c;
-        const totalValue = (currentPrice * shares).toFixed(2);
+        const thisValue = parseFloat((currentPrice * shares).toFixed(2));
 
-        const [result] = await pool.query(
-            'INSERT INTO investments (name, shares, total_value) VALUES (?, ?, ?)',
-            [symbol, shares, totalValue]
-        );
+        // Check if the stock already exists in the database
+        const [rows] = await pool.query(
+            'SELECT shares, total_value FROM investments WHERE name = ?',
+            [symbol]);
 
-        return res.status(201).json({
-            success: true,
-            message: `Purchased ${shares} shares of ${symbol} at $${currentPrice}`,
-            investment_id: result.insertId
-          });
-          
+        let result;
+
+        if (rows.length > 0) {
+            // If exists, update shares and total_value
+            const existingShares = rows[0].shares;
+            const existingValue = parseFloat(rows[0].total_value);
+            const newShares = existingShares + shares;
+            const newValue = (existingValue + thisValue).toFixed(2);
+
+            [result] = await pool.query(
+                'UPDATE investments SET shares = ?, total_value = ?, last_updated = NOW() WHERE name = ?',
+                [newShares, newValue, symbol]
+            );
+        } else {
+            // If not exists, insert new record
+            [result] = await pool.query(
+                'INSERT INTO investments (name, shares, total_value) VALUES (?, ?, ?)',
+                [symbol, shares, thisValue]
+            );
+
+            return res.status(201).json({
+                success: true,
+                message: `Purchased ${shares} shares of ${symbol} at $${currentPrice}`,
+                investment_id: result.insertId
+              });
+        }
+
     } catch (error) {
         console.error('Buy stock failed:', error);
         return res.status(500).json({ error: 'Failed to buy stock' });
