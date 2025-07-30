@@ -1,6 +1,7 @@
 node_modules/
 .env
 files/
-node_modules/
 db/
 .vscode/
+.DS_Store
+package-lock.json
