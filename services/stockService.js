@@ -64,7 +64,7 @@ async function fetchPricesBySymbol(symbols) {
                 symbolPricesMap[symbol] = quoteData.c;
             }
         } catch (e) {
-            console.warn(`Failed to fetch price for ${symbol}`);
+            console.warn(`Failed to fetch price for ${symbol} with err:${e.message}`);
         }
     });
 
