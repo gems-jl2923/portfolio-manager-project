@@ -1,224 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <title>Portfolio Dashboard</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8" />
+    <title>Portfolio Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body class="bg-gray-50 text-gray-900 font-sans min-h-screen overflow-auto">
-  <div class="grid grid-cols-3 gap-6 p-8 max-w-7xl mx-auto">
+    <div class="grid grid-cols-3 gap-6 p-8 max-w-7xl mx-auto">
 
-    <!-- LEFT PANEL -->
-    <div class="bg-white p-6 rounded-2xl shadow-xl space-y-8 border border-gray-200">
-      <div>
-        <h2 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Net Worth</h2>
-        <p class="text-2xl font-semibold text-gray-900 mt-1">$2,317,371.20</p>
-      </div>
+        <!-- LEFT PANEL -->
+        <div class="bg-white p-6 rounded-2xl shadow-xl space-y-8 border border-gray-200">
+            <div>
+                <h2 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Net Worth</h2>
+                <p id="networth-total-left" class="text-2xl font-semibold text-gray-900 mt-1">$0.00</p>
+            </div>
 
-      <!-- Cash Section -->
-      <div>
-        <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide border-b pb-2">Cash</h3>
-        <div class="mt-4 space-y-3 text-sm" data-section="cash">
-          <!-- Cash accounts will load here -->
+            <div>
+                <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide border-b pb-2">Cash</h3>
+                <div class="mt-4 space-y-3 text-sm max-h-52 overflow-y-auto pr-1" data-section="cash"></div>
+            </div>
+
+            <div>
+                <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide border-b pb-2">Investment</h3>
+                <div class="mt-4 space-y-3 text-sm max-h-52 overflow-y-auto pr-1" data-section="investment"></div>
+            </div>
         </div>
-      </div>
 
-      <!-- Investment Section -->
-      <div>
-        <h3 class="text-xs font-medium text-gray-500 uppercase tracking-wide border-b pb-2">Investment</h3>
-        <div class="mt-4 space-y-3 text-sm" data-section="investment">
-          <!-- Investments will load here -->
+        <!-- MIDDLE PANEL -->
+        <div class="bg-white p-6 pt-2 rounded-2xl shadow-xl flex flex-col justify-between border border-gray-200">
+            <div class="mb-10">
+                <div class="flex justify-between items-center mb-4 mt-2">
+                    <h2 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Net Worth</h2>
+                    <div class="text-right">
+                        <p id="networth-today" class="text-2xl font-semibold text-gray-900">$0</p>
+                        <p id="networth-change" class="text-sm">+ $0 (1 Day)</p>
+                    </div>
+                </div>
+                <div
+                    class="w-full h-72 bg-gray-50 rounded-xl p-4 border border-dashed flex items-center justify-center">
+                    <canvas id="netWorthChart" class="w-full h-full max-w-3xl"></canvas>
+                </div>
+            </div>
         </div>
-      </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="bg-white p-6 rounded-2xl shadow-xl space-y-8 border border-gray-200">
+            <div>
+                <h2 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Current Holdings</h2>
+                <ul id="holdingsList" class="text-sm divide-y divide-gray-100 max-h-32 overflow-y-auto pr-2">
+                    <!-- JS will inject holdings here -->
+                </ul>
+            </div>
+
+            <!-- Buy Form -->
+            <form id="buyForm" class="space-y-3">
+                <h3 class="font-semibold text-sm text-gray-700">➕ Buy Stock</h3>
+                <input type="text" id="buySymbol" placeholder="Symbol (e.g. AAPL)"
+                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
+                <input type="number" id="buyAmount" placeholder="Shares (e.g. 10)" min="1"
+                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
+                <button
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-full text-sm font-semibold">Buy</button>
+            </form>
+
+            <!-- Sell Form -->
+            <form id="sellForm" class="space-y-3">
+                <h3 class="font-semibold text-sm text-gray-700">➖ Sell Stock</h3>
+                <input type="text" id="sellSymbol" placeholder="Symbol (e.g. AAPL)"
+                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                    required>
+                <input type="number" id="sellAmount" placeholder="Shares (e.g. 5)" min="1"
+                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                    required>
+                <button
+                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg w-full text-sm font-semibold">Sell</button>
+            </form>
+        </div>
     </div>
 
-    <!-- MIDDLE PANEL -->
-    <div class="bg-white p-6 rounded-2xl shadow-xl flex flex-col justify-between border border-gray-200">
-      <div class="mb-10">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Net Worth</h2>
-          <div class="text-right">
-            <p id="networth-today" class="text-2xl font-semibold text-gray-900">$0</p>
-            <p id="networth-change" class="text-sm">+ $0 (1 Day)</p>
-          </div>
-        </div>
-        <div class="w-full h-72 bg-gray-50 rounded-xl p-4 border border-dashed flex items-center justify-center">
-          <canvas id="netWorthChart" class="w-full h-full max-w-3xl"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT PANEL -->
-    <div class="bg-white p-6 rounded-2xl shadow-xl space-y-8 border border-gray-200">
-      <div>
-        <h2 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Current Holdings</h2>
-        <ul class="text-sm divide-y divide-gray-100 max-h-48 overflow-y-auto pr-2">
-          <li class="py-3">
-            <div class="flex justify-between items-center">
-              <span class="font-medium text-gray-800">Beneke Fabricators</span>
-              <span class="text-green-600 font-semibold">+4.5%</span>
-            </div>
-            <div class="text-xs text-gray-500">12 shares</div>
-          </li>
-          <li class="py-3">
-            <div class="flex justify-between items-center">
-              <span class="font-medium text-gray-800">Fidelity Brokerage</span>
-              <span class="text-red-600 font-semibold">-2.1%</span>
-            </div>
-            <div class="text-xs text-gray-500">30 shares</div>
-          </li>
-          <li class="py-3">
-            <div class="flex justify-between items-center">
-              <span class="font-medium text-gray-800">Pershing (IRA 1)</span>
-              <span class="text-green-600 font-semibold">+1.8%</span>
-            </div>
-            <div class="text-xs text-gray-500">60 shares</div>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Buy Form -->
-      <form id="buyForm" class="space-y-3">
-        <h3 class="font-semibold text-sm text-gray-700">➕ Buy Stock</h3>
-        <input type="text" id="buySymbol" placeholder="Symbol (e.g. AAPL)"
-          class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-        <input type="number" id="buyAmount" placeholder="Shares (e.g. 10)" min="1"
-          class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-full text-sm font-semibold">Buy</button>
-      </form>
-
-      <!-- Sell Form -->
-      <form id="sellForm" class="space-y-3">
-        <h3 class="font-semibold text-sm text-gray-700">➖ Sell Stock</h3>
-        <input type="text" id="sellSymbol" placeholder="Symbol (e.g. AAPL)"
-          class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required>
-        <input type="number" id="sellAmount" placeholder="Shares (e.g. 5)" min="1"
-          class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required>
-        <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg w-full text-sm font-semibold">Sell</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- JavaScript -->
-  <script>
-    function formatTimeAgo(isoString) {
-      const past = new Date(isoString);
-      const now = new Date();
-      const diff = Math.floor((now - past) / 1000);
-
-      if (isNaN(diff)) return 'Just now';
-      if (diff < 60) return 'Just now';
-      if (diff < 3600) return `${Math.floor(diff / 60)} mins ago`;
-      if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
-      return `${Math.floor(diff / 86400)} days ago`;
-    }
-
-    document.addEventListener("DOMContentLoaded", async () => {
-      const response = await fetch('/api/networth');
-      const backendData = await response.json();
-
-      const labels = backendData.map(item => {
-        const date = new Date(item.date);
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      });
-
-      const netWorthValues = backendData.map(item => item.net_worth);
-      const latestNetWorth = netWorthValues.at(-1);
-      const previousNetWorth = netWorthValues.at(-2);
-      const difference = latestNetWorth - previousNetWorth;
-
-      document.getElementById('networth-today').textContent = '$' + latestNetWorth.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    });
-    
-    const changeElem = document.getElementById('networth-change');
-    changeElem.textContent = `${difference >= 0 ? '+' : '-'} $${Math.abs(difference).toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    })} (1 Day)`;
-    changeElem.classList.add(difference >= 0 ? 'text-green-500' : 'text-red-500');
-    
-
-      const ctx = document.getElementById('netWorthChart').getContext('2d');
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Net Worth ($)',
-            data: netWorthValues,
-            fill: true,
-            borderColor: '#3B82F6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            tension: 0.3,
-            pointRadius: 0,
-            borderWidth: 2
-          }]
-        },
-        options: {
-          plugins: {
-            legend: { display: false },
-            tooltip: { mode: 'index', intersect: false }
-          },
-          scales: {
-            x: {
-              ticks: { maxTicksLimit: 6, color: '#6B7280' },
-              grid: { display: false }
-            },
-            y: {
-              ticks: {
-                callback: value => `$${(value / 1000).toFixed(0)}k`,
-                color: '#6B7280'
-              },
-              grid: {
-                color: '#E5E7EB',
-                drawBorder: false
-              }
-            }
-          }
+    <script>
+        function formatTimeAgo(isoString) {
+            const past = new Date(isoString);
+            const now = new Date();
+            const diff = Math.floor((now - past) / 1000);
+            if (isNaN(diff)) return 'Just now';
+            if (diff < 60) return 'Just now';
+            if (diff < 3600) return `${Math.floor(diff / 60)} mins ago`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+            return `${Math.floor(diff / 86400)} days ago`;
         }
-      });
 
-      // Fetch and display cash
-      fetch('/api/left/cash')
-        .then(res => res.json())
-        .then(data => {
-          const container = document.querySelector('[data-section="cash"]');
-          container.innerHTML = '';
-          data.forEach(item => {
-            const html = `
+        document.addEventListener("DOMContentLoaded", async () => {
+            const response = await fetch('/api/networth');
+            const backendData = await response.json();
+            const labels = backendData.map(item => new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+            const netWorthValues = backendData.map(item => item.net_worth);
+            const latestNetWorth = netWorthValues.at(-1);
+            const previousNetWorth = netWorthValues.at(-2);
+            const difference = latestNetWorth - previousNetWorth;
+
+            document.getElementById('networth-today').textContent = '$' + latestNetWorth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const changeElem = document.getElementById('networth-change');
+            changeElem.textContent = `${difference >= 0 ? '+' : '-'} $${Math.abs(difference).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (1 Day)`;
+            changeElem.classList.add(difference >= 0 ? 'text-green-500' : 'text-red-500');
+
+            const ctx = document.getElementById('netWorthChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Net Worth ($)',
+                        data: netWorthValues,
+                        fill: true,
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.3,
+                        pointRadius: 0,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { maxTicksLimit: 6, color: '#6B7280' },
+                            grid: { display: false }
+                        },
+                        y: {
+                            ticks: {
+                                callback: value => `$${(value / 1000).toFixed(0)}k`,
+                                color: '#6B7280'
+                            },
+                            grid: {
+                                color: '#E5E7EB',
+                                drawBorder: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            let total = 0;
+
+            // Left Panel - Cash
+            fetch('/api/left/cash')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.querySelector('[data-section="cash"]');
+                    container.innerHTML = '';
+                    data.forEach(item => {
+                        const val = parseFloat(item.balance);
+                        total += val;
+                        container.insertAdjacentHTML('beforeend', `
               <div>
                 <p class="font-medium">${item.name}</p>
                 <div class="flex justify-between text-gray-500">
-                  <span>$${parseFloat(item.balance).toFixed(2)}</span>
+                  <span>$${val.toFixed(2)}</span>
                   <span>${formatTimeAgo(item.last_updated)}</span>
                 </div>
-              </div>`;
-            container.insertAdjacentHTML('beforeend', html);
-          });
-        });
+              </div>`);
+                    });
+                    document.getElementById('networth-total-left').textContent = '$' + total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                });
 
-      // Fetch and display investments
-      fetch('/api/left/investments')
-        .then(res => res.json())
-        .then(data => {
-          const container = document.querySelector('[data-section="investment"]');
-          container.innerHTML = '';
-          data.forEach(item => {
-            const html = `
+            // Left Panel - Investments
+            fetch('/api/left/investments')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.querySelector('[data-section="investment"]');
+                    container.innerHTML = '';
+                    data.forEach(item => {
+                        const val = parseFloat(item.total_value);
+                        total += val;
+                        container.insertAdjacentHTML('beforeend', `
               <div>
                 <p class="font-medium">${item.name}</p>
                 <div class="flex justify-between text-gray-500">
-                  <span>$${parseFloat(item.total_value).toFixed(2)} (${item.shares} shares)</span>
+                  <span>$${val.toFixed(2)} (${item.shares} shares)</span>
                   <span>${formatTimeAgo(item.last_updated)}</span>
                 </div>
-              </div>`;
-            container.insertAdjacentHTML('beforeend', html);
-          });
+              </div>`);
+                    });
+                    document.getElementById('networth-total-left').textContent = '$' + total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                    // Right Panel - Holdings
+                    const holdingsContainer = document.getElementById('holdingsList');
+                    holdingsContainer.innerHTML = '';
+                    data.forEach(item => {
+                        holdingsContainer.insertAdjacentHTML('beforeend', `
+              <li class="py-2">
+                <div class="flex justify-between items-center">
+                  <span class="font-medium text-gray-800">${item.name}</span>
+                  <span class="text-sm text-gray-500">${item.shares} shares</span>
+                </div>
+              </li>`);
+                    });
+                });
         });
-    });
-  </script>
+    </script>
 </body>
+
 </html>
