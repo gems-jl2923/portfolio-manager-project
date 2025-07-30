@@ -70,7 +70,7 @@ async function fetchPricesBySymbol(symbols) {
 
     await Promise.all(fetches);
 
-    return {symbolPricesMap};
+    return symbolPricesMap;
 
 }
 
