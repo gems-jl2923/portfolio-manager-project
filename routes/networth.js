@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../config/db');
+const db = require('../config/db');
+
 
 // GET /api/networth
 router.get('/', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT date, net_worth FROM net_worth ORDER BY date ASC');
+        const [rows] = await db.pool.query('SELECT date, net_worth FROM net_worth ORDER BY date ASC');
         res.json(rows);
     } catch (err) {
         console.error(err);

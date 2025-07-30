@@ -20,4 +20,4 @@ pool.getConnection()
     console.error('MySQL 连接失败:', err.message);
   });
 
-module.exports = pool;
+module.exports = {pool};
