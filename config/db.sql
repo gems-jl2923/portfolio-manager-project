@@ -1,3 +1,4 @@
+drop DATABASE if exists portfolio;
 CREATE DATABASE portfolio;
 
 USE portfolio;
@@ -49,10 +50,10 @@ CREATE TABLE cash_accounts (
 );
 
 CREATE TABLE investments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
+    id INT AUTO_INCREMENT UNIQUE,
+    name VARCHAR(100) NOT NULL PRIMARY KEY,
     shares INT NOT NULL,
-    total_value DECIMAL(15, 2) NOT NULL,
+    symbol VARCHAR(100) NOT NULL,
     last_updated DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -62,12 +63,6 @@ INSERT INTO cash_accounts (name, balance) VALUES
 ('Wells Fargo (Checking)', 309.13),
 ('Wells Fargo (Savings)', 2000.67);
 
--- Investments
-INSERT INTO investments (name, shares, total_value) VALUES
-('Beneke Fabricators', 12, 16231.00),
-('Fidelity Brokerage', 30, 53165.79),
-('Pershing (IRA 1)', 60, 456191.03),
-('Stock Options - Pandora', 5, 31715.00);
 
 -- select * from cash_accounts;
 -- select * from investments;

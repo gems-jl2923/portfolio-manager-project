@@ -11,6 +11,9 @@ app.use('/api/left', leftPanelRoutes);
 app.use('/api/stock', stockRoutes);
 
 const PORT = 3000;
+
+
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
