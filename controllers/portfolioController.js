@@ -71,6 +71,7 @@ exports.buyStock = async (req, res) => {
             message: `Purchased ${shares} shares of ${symbol} at $${currentPrice}`,
             investment_id: result.insertId
           });
+          
     } catch (error) {
         console.error('Buy stock failed:', error);
         return res.status(500).json({ error: 'Failed to buy stock' });
@@ -78,23 +79,23 @@ exports.buyStock = async (req, res) => {
 }
 
 
-// exports.getStockList = async (req, res) => {
-//     try {
-//         const response = await fetch(FINNHUB_API_URL);
-//         const data = await response.json();
+exports.getStockList = async (req, res) => {
+    try {
+        const response = await fetch(SYMBOL_LIST_API);
+        const data = await response.json();
 
-//         if (!Array.isArray(data)) {
-//             return res.status(500).json({ error: 'Invalid data format from external API' });
-//           }
+        if (!Array.isArray(data)) {
+            return res.status(500).json({ error: 'Invalid data format from external API' });
+          }
 
-//         const symbolList = data.map(item => item.symbol).filter(Boolean);
+        const symbolList = data.map(item => item.symbol).filter(Boolean);
           
-//         return res.json({ stock_list: symbolList });
+        return res.json({ stock_list: symbolList });
 
-//     } catch (error) {
-//         console.error('Fetch stock list failed:', error);
-//         return res.status(500).json({ error: 'Failed to fetch stock list' });
-//     }
-// };
+    } catch (error) {
+        console.error('Fetch stock list failed:', error);
+        return res.status(500).json({ error: 'Failed to fetch stock list' });
+    }
+};
 
 
