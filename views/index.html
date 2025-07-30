@@ -30,17 +30,17 @@
         </div>
 
         <!-- MIDDLE PANEL -->
-        <div class="bg-white p-6 pt-2 rounded-2xl shadow-xl flex flex-col justify-between border border-gray-200">
+        <div class="bg-white p-6 pt-0 rounded-2xl shadow-xl flex flex-col justify-between border border-gray-200">
             <div class="mb-10">
-                <div class="flex justify-between items-center mb-4 mt-2">
+                <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Net Worth</h2>
-                    <div class="text-right">
+                    <div class="text-right mt-6">
                         <p id="networth-today" class="text-2xl font-semibold text-gray-900">$0</p>
                         <p id="networth-change" class="text-sm">+ $0 (1 Day)</p>
                     </div>
                 </div>
                 <div
-                    class="w-full h-72 bg-gray-50 rounded-xl p-4 border border-dashed flex items-center justify-center">
+                    class="w-full h-72 bg-gray-50 rounded-xl p-4 border border-dashed flex items-center justify-center mt-6">
                     <canvas id="netWorthChart" class="w-full h-full max-w-3xl"></canvas>
                 </div>
             </div>
@@ -58,9 +58,12 @@
             <!-- Buy Form -->
             <form id="buyForm" class="space-y-3">
                 <h3 class="font-semibold text-sm text-gray-700">➕ Buy Stock</h3>
-                <input type="text" id="buySymbol" placeholder="Symbol (e.g. AAPL)"
+                <select id="buySymbol"
                     class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required>
+                    <option value="">Select stock...</option>
+                </select>
+
                 <input type="number" id="buyAmount" placeholder="Shares (e.g. 10)" min="1"
                     class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required>
@@ -204,6 +207,20 @@
                 </div>
               </li>`);
                     });
+                    // Populate Buy Form dropdown from /api/stocks/symbols
+                    fetch('/api/stock/symbols')
+                        .then(res => res.json())
+                        .then(data => {
+                            const select = document.getElementById('buySymbol');
+                            data.forEach(item => {
+                                const option = document.createElement('option');
+                                option.value = item.name;
+                                option.textContent = item.name;
+                                select.appendChild(option);
+                            });
+                        })
+                        .catch(err => console.error('Error loading stock symbols:', err));
+
                 });
         });
     </script>
