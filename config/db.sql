@@ -70,3 +70,16 @@ INSERT INTO cash_accounts (name, balance) VALUES
 -- UPDATE investments
 -- SET total_value = 6500.00, shares = 30, last_updated = NOW()
 -- WHERE id = 1;
+
+CREATE TABLE stock (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+INSERT INTO stock (name) VALUES
+('stock1'),
+('dexter'),
+('wss)'),
+('hungry');
+
+select * from stock;
