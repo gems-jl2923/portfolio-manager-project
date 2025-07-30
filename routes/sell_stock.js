@@ -46,7 +46,7 @@ const getStockPrice = (symbol) => {
 };
 
 // 售卖股票的接口
-router.post('/sell', async (req, res) => {
+router.post('/sell_stock', async (req, res) => {
     const { stockSymbol, sharesToSell } = req.body;
 
     // 基本参数存在性检查

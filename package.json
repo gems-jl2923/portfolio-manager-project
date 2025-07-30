@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-
     "test": "node app.js",
-
     "start": "node app.js"
   },
   "keywords": [],
@@ -28,5 +26,6 @@
   "bugs": {
     "url": "https://github.com/gems-jl2923/portfolio-manager-project/issues"
   },
-  "homepage": "https://github.com/gems-jl2923/portfolio-manager-project#readme"
+  "homepage": "https://github.com/gems-jl2923/portfolio-manager-project#readme",
+  "devDependencies": {}
 }
