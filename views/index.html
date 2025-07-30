@@ -39,7 +39,8 @@
                         <p id="networth-change" class="text-sm">+ $0 (1 Day)</p>
                     </div>
                 </div>
-                <div class="w-full h-72 bg-gray-50 rounded-xl p-4 border border-dashed flex items-center justify-center mt-6">
+                <div
+                    class="w-full h-72 bg-gray-50 rounded-xl p-4 border border-dashed flex items-center justify-center mt-6">
                     <canvas id="netWorthChart" class="w-full h-full max-w-3xl"></canvas>
                 </div>
             </div>
@@ -57,21 +58,30 @@
             <!-- Buy Form -->
             <form id="buyForm" class="space-y-3">
                 <h3 class="font-semibold text-sm text-gray-700">➕ Buy Stock</h3>
-                <select id="buySymbol" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    <option value="">Select stock...</option>
-                </select>
-                <input type="number" id="buyAmount" placeholder="Shares (e.g. 10)" min="1" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-full text-sm font-semibold">Buy</button>
+                <input type="text" id="buySymbol" placeholder="Stock Symbol (e.g. AAPL)"
+                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
+                <input type="number" id="buyAmount" placeholder="Shares (e.g. 10)" min="1"
+                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
+                <button
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-full text-sm font-semibold">Buy</button>
             </form>
+
 
             <!-- Sell Form -->
             <form id="sellForm" class="space-y-3">
                 <h3 class="font-semibold text-sm text-gray-700">➖ Sell Stock</h3>
-                <select id="sellSymbol" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                <select id="sellSymbol"
+                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                    required>
                     <option value="">Select stock...</option>
                 </select>
-                <input type="number" id="sellAmount" placeholder="Shares (e.g. 5)" min="1" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required>
-                <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg w-full text-sm font-semibold">Sell</button>
+                <input type="number" id="sellAmount" placeholder="Shares (e.g. 5)" min="1"
+                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                    required>
+                <button
+                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg w-full text-sm font-semibold">Sell</button>
             </form>
         </div>
     </div>
@@ -199,18 +209,40 @@
                     });
                 });
 
-            // Buy Symbol dropdown
-            fetch('/api/stock/symbols')
-                .then(res => res.json())
-                .then(data => {
-                    const select = document.getElementById('buySymbol');
-                    data.forEach(item => {
-                        const option = document.createElement('option');
-                        option.value = item.name;
-                        option.textContent = item.name;
-                        select.appendChild(option);
+            // Buy Stock form logic
+            document.getElementById('buyForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const symbol = document.getElementById('buySymbol').value.trim().toUpperCase();
+                const shares = document.getElementById('buyAmount').value.trim();
+
+                // 校验
+                if (!symbol || isNaN(shares) || parseInt(shares) <= 0) {
+                    alert('Please enter a valid stock symbol and positive number of shares.');
+                    return;
+                }
+
+                try {
+                    const res = await fetch('/api/portfolio/buy_stock', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ symbol, shares: parseInt(shares) })
                     });
-                });
+
+                    const result = await res.json();
+
+                    if (!res.ok) {
+                        throw new Error(result.error || 'Failed to buy stock');
+                    }
+
+                    alert(result.message || 'Stock purchased successfully!');
+                    document.getElementById('buyForm').reset(); // 清空表单
+                    location.reload(); // 刷新页面以更新左侧数据
+                } catch (err) {
+                    alert('Error: ' + err.message);
+                }
+            });
+
 
             // Sell Symbol dropdown
             fetch('/api/left/investments/symbols')

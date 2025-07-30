@@ -1,3 +1,4 @@
+//legacy code, do not edit.
 const express = require('express');
 const router = express.Router();
 const db = require('../config/db'); // 这个 db 已经是 promise pool
