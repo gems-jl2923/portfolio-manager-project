@@ -4,6 +4,22 @@ const API_KEY = 'd246ndpr01qmb590rj80d246ndpr01qmb590rj8g';
 const SYMBOL_LIST_API = `https://finnhub.io/api/v1/stock/symbol?exchange=US&token=${API_KEY}`;
 const QUOTE_API = (symbol) => `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`;
 
+// Define the cached stock symbols
+let cachedSymbols = null;
+
+async function isValidSymbol(symbol) {
+  if (!cachedSymbols) {
+    const response = await fetch(SYMBOL_LIST_API);
+    const data = await response.json();
+
+    if (!Array.isArray(data)) return false;
+
+    cachedSymbols = new Set(data.map(item => item.symbol));
+  }
+
+  return cachedSymbols.has(symbol);
+}
+
 exports.getStockInfo = async (req, res) => {
     try {
       // Get stock symbol list
@@ -51,6 +67,11 @@ exports.buyStock = async (req, res) => {
       }
     
     try{
+        const valid = await isValidSymbol(symbol);
+        if (!valid) {
+          return res.status(400).json({ error: `Invalid symbol: ${symbol} does not exist.` });
+        }
+        
         const quoteRes = await fetch(QUOTE_API(symbol));
         const quoteData = await quoteRes.json();
 
