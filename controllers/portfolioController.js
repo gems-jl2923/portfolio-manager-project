@@ -20,6 +20,7 @@ async function isValidSymbol(symbol) {
   return cachedSymbols.has(symbol);
 }
 
+// Function of outputting all stocks symbols and current price of each stock 
 exports.getStockInfo = async (req, res) => {
     try {
       // Get stock symbol list
@@ -59,6 +60,7 @@ exports.getStockInfo = async (req, res) => {
   };
 
 
+// Function of buy stocks
 exports.buyStock = async (req, res) => {
     const { symbol, shares } = req.body;
 
@@ -71,7 +73,7 @@ exports.buyStock = async (req, res) => {
         if (!valid) {
           return res.status(400).json({ error: `Invalid symbol: ${symbol} does not exist.` });
         }
-        
+
         const quoteRes = await fetch(QUOTE_API(symbol));
         const quoteData = await quoteRes.json();
 
@@ -121,6 +123,7 @@ exports.buyStock = async (req, res) => {
 }
 
 
+// Function of outputting all stocks symbols and store in a List
 exports.getStockList = async (req, res) => {
     try {
         const response = await fetch(SYMBOL_LIST_API);
