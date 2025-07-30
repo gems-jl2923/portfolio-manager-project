@@ -39,8 +39,7 @@
                         <p id="networth-change" class="text-sm">+ $0 (1 Day)</p>
                     </div>
                 </div>
-                <div
-                    class="w-full h-72 bg-gray-50 rounded-xl p-4 border border-dashed flex items-center justify-center mt-6">
+                <div class="w-full h-72 bg-gray-50 rounded-xl p-4 border border-dashed flex items-center justify-center mt-6">
                     <canvas id="netWorthChart" class="w-full h-full max-w-3xl"></canvas>
                 </div>
             </div>
@@ -58,30 +57,21 @@
             <!-- Buy Form -->
             <form id="buyForm" class="space-y-3">
                 <h3 class="font-semibold text-sm text-gray-700">➕ Buy Stock</h3>
-                <select id="buySymbol"
-                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required>
+                <select id="buySymbol" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                     <option value="">Select stock...</option>
                 </select>
-
-                <input type="number" id="buyAmount" placeholder="Shares (e.g. 10)" min="1"
-                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required>
-                <button
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-full text-sm font-semibold">Buy</button>
+                <input type="number" id="buyAmount" placeholder="Shares (e.g. 10)" min="1" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-full text-sm font-semibold">Buy</button>
             </form>
 
             <!-- Sell Form -->
             <form id="sellForm" class="space-y-3">
                 <h3 class="font-semibold text-sm text-gray-700">➖ Sell Stock</h3>
-                <input type="text" id="sellSymbol" placeholder="Symbol (e.g. AAPL)"
-                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                    required>
-                <input type="number" id="sellAmount" placeholder="Shares (e.g. 5)" min="1"
-                    class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-                    required>
-                <button
-                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg w-full text-sm font-semibold">Sell</button>
+                <select id="sellSymbol" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                    <option value="">Select stock...</option>
+                </select>
+                <input type="number" id="sellAmount" placeholder="Shares (e.g. 5)" min="1" class="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg w-full text-sm font-semibold">Sell</button>
             </form>
         </div>
     </div>
@@ -154,7 +144,7 @@
 
             let total = 0;
 
-            // Left Panel - Cash
+            // Cash
             fetch('/api/left/cash')
                 .then(res => res.json())
                 .then(data => {
@@ -164,18 +154,18 @@
                         const val = parseFloat(item.balance);
                         total += val;
                         container.insertAdjacentHTML('beforeend', `
-              <div>
-                <p class="font-medium">${item.name}</p>
-                <div class="flex justify-between text-gray-500">
-                  <span>$${val.toFixed(2)}</span>
-                  <span>${formatTimeAgo(item.last_updated)}</span>
-                </div>
-              </div>`);
+                            <div>
+                                <p class="font-medium">${item.name}</p>
+                                <div class="flex justify-between text-gray-500">
+                                    <span>$${val.toFixed(2)}</span>
+                                    <span>${formatTimeAgo(item.last_updated)}</span>
+                                </div>
+                            </div>`);
                     });
                     document.getElementById('networth-total-left').textContent = '$' + total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
                 });
 
-            // Left Panel - Investments
+            // Investments
             fetch('/api/left/investments')
                 .then(res => res.json())
                 .then(data => {
@@ -185,42 +175,54 @@
                         const val = parseFloat(item.total_value);
                         total += val;
                         container.insertAdjacentHTML('beforeend', `
-              <div>
-                <p class="font-medium">${item.name}</p>
-                <div class="flex justify-between text-gray-500">
-                  <span>$${val.toFixed(2)} (${item.shares} shares)</span>
-                  <span>${formatTimeAgo(item.last_updated)}</span>
-                </div>
-              </div>`);
+                            <div>
+                                <p class="font-medium">${item.name}</p>
+                                <div class="flex justify-between text-gray-500">
+                                    <span>$${val.toFixed(2)} (${item.shares} shares)</span>
+                                    <span>${formatTimeAgo(item.last_updated)}</span>
+                                </div>
+                            </div>`);
                     });
                     document.getElementById('networth-total-left').textContent = '$' + total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-                    // Right Panel - Holdings
+                    // Holdings
                     const holdingsContainer = document.getElementById('holdingsList');
                     holdingsContainer.innerHTML = '';
                     data.forEach(item => {
                         holdingsContainer.insertAdjacentHTML('beforeend', `
-              <li class="py-2">
-                <div class="flex justify-between items-center">
-                  <span class="font-medium text-gray-800">${item.name}</span>
-                  <span class="text-sm text-gray-500">${item.shares} shares</span>
-                </div>
-              </li>`);
+                            <li class="py-2">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-medium text-gray-800">${item.name}</span>
+                                    <span class="text-sm text-gray-500">${item.shares} shares</span>
+                                </div>
+                            </li>`);
                     });
-                    // Populate Buy Form dropdown from /api/stocks/symbols
-                    fetch('/api/stock/symbols')
-                        .then(res => res.json())
-                        .then(data => {
-                            const select = document.getElementById('buySymbol');
-                            data.forEach(item => {
-                                const option = document.createElement('option');
-                                option.value = item.name;
-                                option.textContent = item.name;
-                                select.appendChild(option);
-                            });
-                        })
-                        .catch(err => console.error('Error loading stock symbols:', err));
+                });
 
+            // Buy Symbol dropdown
+            fetch('/api/stock/symbols')
+                .then(res => res.json())
+                .then(data => {
+                    const select = document.getElementById('buySymbol');
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.name;
+                        option.textContent = item.name;
+                        select.appendChild(option);
+                    });
+                });
+
+            // Sell Symbol dropdown
+            fetch('/api/left/investments/symbols')
+                .then(res => res.json())
+                .then(data => {
+                    const select = document.getElementById('sellSymbol');
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.name;
+                        option.textContent = item.name;
+                        select.appendChild(option);
+                    });
                 });
         });
     </script>
