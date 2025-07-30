@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
         if (rows.length === 0 || rows[rows.length - 1].date.toLocaleDateString('sv-SE') !== today) {
             // use stockService to calculate today's net worth
             const [investments_rows] = await db.pool.query('SELECT shares, symbol FROM investments');
-            
+
             const symbols = investments_rows.map(row => row.symbol);
 
             const symbolPricesMap = await stockService.fetchPricesBySymbol(symbols);
@@ -28,16 +28,23 @@ router.get('/', async (req, res) => {
                 }
             });
 
-            const [result] = await db.pool.query('INSERT INTO net_worth (date, net_worth) VALUES (?, ?)', [today, today_net_worth]);
-            console.log(`Inserted new row for today: ${today}`);
-            rows.push({ date: today, net_worth: 0 }); // 添加新插入的行到结果中
-            res.json(rows);
+            // get cash from cash_accounts table
+            // cash_accounts has columns: id, name, balance, last_updated
+            const [cash_rows] = await db.pool.query('SELECT * FROM cash_accounts');
+            // add cash balance to today's net worth
+            cash_rows.forEach(cash_row => {
+                today_net_worth += Number(cash_row.balance);
+            });
+            rows.push({ date: today, net_worth: today_net_worth.toFixed(2) }); // 添加新插入的行到结果中
+
+            await db.pool.query('INSERT INTO net_worth (date, net_worth) VALUES (?, ?)', [today, today_net_worth.toFixed(2)]);
+            console.log(`Inserted new row for today: ${today}, net_worth: ${today_net_worth.toFixed(2)}`);
         }
         res.json(rows);
-    }catch (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Database error' });
-        }
-    });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database error' });
+    }
+});
 
 module.exports = router;

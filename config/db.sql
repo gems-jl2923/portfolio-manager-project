@@ -5,7 +5,8 @@ USE portfolio;
 
 CREATE TABLE net_worth (
     date DATE PRIMARY KEY,
-    net_worth DOUBLE
+    net_worth DOUBLE,
+    
 );
 
 INSERT INTO net_worth (date, net_worth)
