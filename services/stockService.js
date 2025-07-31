@@ -61,6 +61,7 @@ async function fetchPricesBySymbol(symbols) {
             const quoteData = await quoteRes.json();
 
             if (quoteData && typeof quoteData.c === 'number') {
+                console.log(`Fetched price for ${symbol}: ${quoteData.c}`);
                 symbolPricesMap[symbol] = quoteData.c;
             }
         } catch (e) {
