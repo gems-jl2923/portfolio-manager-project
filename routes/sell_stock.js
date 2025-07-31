@@ -1,3 +1,5 @@
+console.log('[SELL REQUEST]', req.body);
+
 const express = require('express');
 const router = express.Router();
 const db = require('../config/db'); // 数据库配置
