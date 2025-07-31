@@ -75,7 +75,33 @@ async function fetchPricesBySymbol(symbols) {
 
 }
 
+// fetch yesterday price by symbol
+async function fetchYesterdayPricesBySymbol(symbols) {
+    const symbolPricesMap = {};
+    // 获取每个symbol的价格
+    const fetches = symbols.map(async (symbol) => {
+        try {
+            const quoteRes = await fetch(QUOTE_API(symbol));
+            const quoteData = await quoteRes.json();
+
+            if (quoteData && typeof quoteData.c === 'number') {
+                console.log(`Fetched price for ${symbol}: ${quoteData.pc}`);
+                symbolPricesMap[symbol] = quoteData.pc;
+            }
+        } catch (e) {
+            console.warn(`Failed to fetch price for ${symbol} with err:${e.message}`);
+        }
+    });
+
+    await Promise.all(fetches);
+
+    return symbolPricesMap;
+
+}
+
+
+
 
 module.exports = {
-    fetchStockNameSymbolPrice, fetchPricesBySymbol
+    fetchStockNameSymbolPrice, fetchPricesBySymbol, fetchYesterdayPricesBySymbol
 };
