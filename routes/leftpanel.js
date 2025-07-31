@@ -28,10 +28,10 @@ router.get('/investments', async (req, res) => {
         const symbolPricesMap = await stockService.fetchPricesBySymbol(symbols);
 
         // change the rows's total_value to current price * shares
+        console.log("Start calculate total_value for investments");
         symbols.forEach((symbol, index) => {
             const currentPrice = symbolPricesMap[symbol];
             if (currentPrice >= 0) {
-                console.log(`Current price for ${symbol}: ${currentPrice}`);
                 const total_value = currentPrice * rows[index].shares;
                 rows[index].total_value = total_value;
             }
