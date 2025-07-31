@@ -11,6 +11,7 @@ app.use(express.json());
 app.use('/api/networth', networthRoutes); // 注册 API 路由
 app.use('/api/left', leftPanelRoutes);
 app.use('/api/stock', stockRoutes);
+app.use('/api/portfolio', portfolioRoutes); // ✅ 路由注册
 app.use('/', portfolioRoutes);
 
 
