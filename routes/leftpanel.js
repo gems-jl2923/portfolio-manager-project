@@ -25,7 +25,7 @@ router.get('/investments', async (req, res) => {
         // use stockService to get current prices
         console.log(`Starting to fetch current prices for investments:`);
 
-        const symbolPricesMap = await stockService.fetchPricesBySymbol(symbols);
+        const symbolPricesMap = await stockService.fetchPricesBySymbol(symbols, API_KEY="d25hjq9r01qns40f00agd25hjq9r01qns40f00b0");
 
         // change the rows's total_value to current price * shares
         symbols.forEach((symbol, index) => {
@@ -46,7 +46,6 @@ router.get('/investments', async (req, res) => {
 // ✅ 新增 API：获取所有投资股票的 symbol 名称（例如用于 Sell 表单的下拉列表）
 router.get('/investments/symbols', async (req, res) => {
     try {
-        const { pool } = require('../config/db');
         const [results] = await db.pool.execute('SELECT name FROM investments');
         res.json(results);
     } catch (err) {

@@ -4,7 +4,7 @@ const { pool } = require('../config/db'); // ✅ Properly import database connec
 const https = require('https');
 const { URL } = require('url');
 
-const API_KEY = 'd246ndpr01qmb590rj80d246ndpr01qmb590rj8g';
+const API_KEY = 'd25hsphr01qns40f17qgd25hsphr01qns40f17r0';
 const QUOTE_API = (symbol) => `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`;
 
 // Helper function: fetch stock price from Finnhub

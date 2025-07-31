@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
 
             console.log(`Starting to fetch previous close prices for investments: ${symbols.join(', ')}`);
             // fetch yesterday's prices for all symbols in investments
-            const symbolYesterdayPricesMap = await stockService.fetchYesterdayPricesBySymbol(symbols);
+            const symbolYesterdayPricesMap = await stockService.fetchYesterdayPricesBySymbol(symbols, API_KEY="d25hq21r01qns40f0rl0d25hq21r01qns40f0rlg");
 
             console.log(`Start calculate ${yesterday} total_net_worth `);
             let yesterdayNetWorth = 0;
@@ -45,7 +45,7 @@ router.get('/', async (req, res) => {
         // calculate today value
         console.log(`Starting to fetch current prices for investments: ${symbols.join(', ')}`);
         // fetch today's prices for all symbols in investments
-        const symbolPricesMap = await stockService.fetchPricesBySymbol(symbols);
+        const symbolPricesMap = await stockService.fetchPricesBySymbol(symbols, API_KEY="d25hq21r01qns40f0rl0d25hq21r01qns40f0rlg");
 
         // get today date
         const today = new Date().toISOString().split('T')[0];

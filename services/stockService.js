@@ -1,15 +1,15 @@
 const fetch = require('node-fetch'); // 如果用ESM请用 import fetch from 'node-fetch'
-const API_KEY = 'd25gq11r01qns40esfg0d25gq11r01qns40esfgg';
-const SYMBOL_LIST_API = `https://finnhub.io/api/v1/stock/symbol?exchange=US&token=${API_KEY}`;
-const QUOTE_API = (symbol) => `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`;
+// const API_KEY = 'd25hjq9r01qns40f00agd25hjq9r01qns40f00b0';
+// const QUOTE_API = (symbol) => `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`;
 
 /**
  * 获取前10个美股的名称、symbol和当前价格
  * 返回 { nameSymbolMap, symbolPricesMap }
  */
-async function fetchStockNameSymbolPrice() {
+async function fetchStockNameSymbolPrice(API_KEY) {
     try {
         // 获取股票symbol列表
+        const SYMBOL_LIST_API = `https://finnhub.io/api/v1/stock/symbol?exchange=US&token=${API_KEY}`;
         const response = await fetch(SYMBOL_LIST_API);
         const data = await response.json();
 
@@ -52,11 +52,12 @@ async function fetchStockNameSymbolPrice() {
 }
 
 // fetch price by symbol
-async function fetchPricesBySymbol(symbols) {
+async function fetchPricesBySymbol(symbols, API_KEY) {
     const symbolPricesMap = {};
     // 获取每个symbol的价格
     const fetches = symbols.map(async (symbol) => {
         try {
+            const QUOTE_API = (symbol) => `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`;
             const quoteRes = await fetch(QUOTE_API(symbol));
             const quoteData = await quoteRes.json();
 
@@ -76,11 +77,12 @@ async function fetchPricesBySymbol(symbols) {
 }
 
 // fetch yesterday price by symbol
-async function fetchYesterdayPricesBySymbol(symbols) {
+async function fetchYesterdayPricesBySymbol(symbols, API_KEY) {
     const symbolPricesMap = {};
     // 获取每个symbol的价格
     const fetches = symbols.map(async (symbol) => {
         try {
+            const QUOTE_API = (symbol) => `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`;
             const quoteRes = await fetch(QUOTE_API(symbol));
             const quoteData = await quoteRes.json();
 

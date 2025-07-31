@@ -1,6 +1,6 @@
 const {pool} = require('../config/db');
 
-const API_KEY = 'd246ndpr01qmb590rj80d246ndpr01qmb590rj8g';
+const API_KEY = 'd25ht1pr01qns40f18v0d25ht1pr01qns40f18vg';
 const SYMBOL_LIST_API = `https://finnhub.io/api/v1/stock/symbol?exchange=US&token=${API_KEY}`;
 const QUOTE_API = (symbol) => `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`;
 
