@@ -33,24 +33,20 @@
         <div class="bg-white p-6 pt-0 rounded-2xl shadow-xl flex flex-col justify-between border border-gray-200">
             <div class="mb-10">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Net Worth</h2>
+                    <h2 class="text-xs font-medium text-gray-500 uppercase tracking-wide">Investment Worth</h2>
                     <div class="text-right mt-6">
                         <p id="networth-today" class="text-2xl font-semibold text-gray-900">$0</p>
-                        <p id="networth-change" class="text-sm">+ $0 (1 Day)</p>
+                        <p id="networth-change" class="text-sm text-gray-500">Total Investment Value</p>
                     </div>
                 </div>
 
-                <!-- Chart Container -->
-                <div
-                    class="w-full h-72 bg-gray-50 rounded-xl p-4 border border-dashed flex items-center justify-center mt-6">
+                <div class="w-full h-72 bg-gray-50 rounded-xl p-4 border border-dashed flex items-center justify-center mt-6">
                     <canvas id="netWorthChart" class="w-full h-full max-w-3xl"></canvas>
                 </div>
 
-                <!-- ✅ Logo 插入在这里 -->
                 <div class="flex justify-center mt-8">
                     <img src="/logo.png" alt="Logo" class="w-64 h-auto object-contain" />
                 </div>
-
             </div>
         </div>
 
@@ -58,9 +54,7 @@
         <div class="bg-white p-6 rounded-2xl shadow-xl space-y-8 border border-gray-200">
             <div>
                 <h2 class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Current Holdings</h2>
-                <ul id="holdingsList" class="text-sm divide-y divide-gray-100 max-h-32 overflow-y-auto pr-2">
-                    <!-- JS will inject holdings here -->
-                </ul>
+                <ul id="holdingsList" class="text-sm divide-y divide-gray-100 max-h-32 overflow-y-auto pr-2"></ul>
             </div>
 
             <!-- Buy Form -->
@@ -75,7 +69,6 @@
                 <button
                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-full text-sm font-semibold">Buy</button>
             </form>
-
 
             <!-- Sell Form -->
             <form id="sellForm" class="space-y-3">
@@ -107,18 +100,36 @@
         }
 
         document.addEventListener("DOMContentLoaded", async () => {
+            // ✅ Load Investment Worth to Middle Panel
+            (async () => {
+                try {
+                    const res = await fetch('/api/left/investments');
+                    const data = await res.json();
+                    let investmentTotal = 0;
+                    data.forEach(item => {
+                        investmentTotal += parseFloat(item.total_value);
+                    });
+
+                    document.getElementById('networth-today').textContent =
+                        '$' + investmentTotal.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+
+                    const changeElem = document.getElementById('networth-change');
+                    changeElem.textContent = 'Total Investment Value';
+                    changeElem.classList.remove('text-green-500', 'text-red-500');
+                    changeElem.classList.add('text-gray-500');
+                } catch (err) {
+                    console.error('Failed to fetch investment worth:', err);
+                }
+            })();
+
+            // ✅ Chart for Net Worth Over 30 Days
             const response = await fetch('/api/networth');
             const backendData = await response.json();
             const labels = backendData.map(item => new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
             const netWorthValues = backendData.map(item => item.net_worth);
-            const latestNetWorth = netWorthValues.at(-1);
-            const previousNetWorth = netWorthValues.at(-2);
-            const difference = latestNetWorth - previousNetWorth;
-
-            document.getElementById('networth-today').textContent = '$' + latestNetWorth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            const changeElem = document.getElementById('networth-change');
-            changeElem.textContent = `${difference >= 0 ? '+' : '-'} $${Math.abs(difference).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (1 Day)`;
-            changeElem.classList.add(difference >= 0 ? 'text-green-500' : 'text-red-500');
 
             const ctx = document.getElementById('netWorthChart').getContext('2d');
             new Chart(ctx, {
@@ -160,9 +171,8 @@
                 }
             });
 
+            // Cash section
             let total = 0;
-
-            // Cash
             fetch('/api/left/cash')
                 .then(res => res.json())
                 .then(data => {
@@ -180,10 +190,10 @@
                                 </div>
                             </div>`);
                     });
-                    document.getElementById('networth-total-left').textContent = '$' + total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    document.getElementById('networth-total-left').textContent = '$' + total.toFixed(2);
                 });
 
-            // Investments
+            // Investment section
             fetch('/api/left/investments')
                 .then(res => res.json())
                 .then(data => {
@@ -201,9 +211,8 @@
                                 </div>
                             </div>`);
                     });
-                    document.getElementById('networth-total-left').textContent = '$' + total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    document.getElementById('networth-total-left').textContent = '$' + total.toFixed(2);
 
-                    // Holdings
                     const holdingsContainer = document.getElementById('holdingsList');
                     holdingsContainer.innerHTML = '';
                     data.forEach(item => {
@@ -217,16 +226,14 @@
                     });
                 });
 
-            // Buy Stock form logic
+            // Buy Form
             document.getElementById('buyForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-
                 const symbol = document.getElementById('buySymbol').value.trim().toUpperCase();
-                const shares = document.getElementById('buyAmount').value.trim();
+                const shares = parseInt(document.getElementById('buyAmount').value.trim());
 
-                // 校验
-                if (!symbol || isNaN(shares) || parseInt(shares) <= 0) {
-                    alert('Please enter a valid stock symbol and positive number of shares.');
+                if (!symbol || isNaN(shares) || shares <= 0) {
+                    alert('Please enter a valid stock symbol and number of shares.');
                     return;
                 }
 
@@ -234,23 +241,18 @@
                     const res = await fetch('/api/portfolio/buy_stock', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ symbol, shares: parseInt(shares) })
+                        body: JSON.stringify({ symbol, shares })
                     });
 
                     const result = await res.json();
-
-                    if (!res.ok) {
-                        throw new Error(result.error || 'Failed to buy stock');
-                    }
-
+                    if (!res.ok) throw new Error(result.error || 'Failed to buy stock');
                     alert(result.message || 'Stock purchased successfully!');
-                    document.getElementById('buyForm').reset(); // 清空表单
-                    location.reload(); // 刷新页面以更新左侧数据
+                    document.getElementById('buyForm').reset();
+                    location.reload();
                 } catch (err) {
                     alert('Error: ' + err.message);
                 }
             });
-
 
             // Sell Symbol dropdown
             fetch('/api/left/investments/symbols')
