@@ -1,5 +1,5 @@
 const fetch = require('node-fetch'); // 如果用ESM请用 import fetch from 'node-fetch'
-const API_KEY = 'd246ndpr01qmb590rj80d246ndpr01qmb590rj8g';
+const API_KEY = 'd25ccihr01qns40e9ao0d25ccihr01qns40e9aog';
 const SYMBOL_LIST_API = `https://finnhub.io/api/v1/stock/symbol?exchange=US&token=${API_KEY}`;
 const QUOTE_API = (symbol) => `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`;
 
