@@ -70,7 +70,7 @@ router.post('/sell', async (req, res) => {
             return res.status(400).json({ error: 'Cannot sell more shares than currently held.' });
         }
 
-        const currentPrice = await getStockPrice(stockSname);
+        const currentPrice = req.app.locals.symbolsPricesMap[stockSname];
 
         if (!currentPrice || isNaN(currentPrice)) {
             return res.status(500).json({ error: 'Failed to fetch a valid stock price.' });
