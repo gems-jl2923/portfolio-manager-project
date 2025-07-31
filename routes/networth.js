@@ -50,8 +50,6 @@ router.get('/', async (req, res) => {
         // get today date
         const today = new Date().toISOString().split('T')[0];
 
-        console.log(`Start calculate ${today} total_net_worth`);
-
         let todayNetWorth = 0;
         investments_rows.forEach(row => {
             const todayPrice = symbolPricesMap[row.symbol];
