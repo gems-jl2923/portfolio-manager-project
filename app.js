@@ -5,6 +5,7 @@ const networthRoutes = require('./routes/networth');
 const leftPanelRoutes = require('./routes/leftpanel');
 const stockRoutes = require('./routes/stock');
 const portfolioRoutes = require('./routes/portfolioRoutes');
+const sellStockRoutes = require('./routes/sell_stock');
 
 app.use(express.static('views')); // dashboard.html 放在 views 文件夹
 app.use(express.json());
@@ -13,6 +14,7 @@ app.use('/api/left', leftPanelRoutes);
 app.use('/api/stock', stockRoutes);
 app.use('/api/portfolio', portfolioRoutes); // ✅ 路由注册
 app.use('/', portfolioRoutes);
+app.use('/api/sellstock', sellStockRoutes); // ✅ 卖出股票的路由
 
 
 // TODO: use app.locals.datePricesMap to fetch prices once, datePricesMap is a dictionary : {date:prices}

@@ -282,7 +282,7 @@
                 }
 
                 try {
-                    const res = await fetch('/api/sell_stock/sell', {
+                    const res = await fetch('/api/sellstock/sell', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ stockSymbol, sharesToSell })
