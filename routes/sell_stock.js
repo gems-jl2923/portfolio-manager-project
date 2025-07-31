@@ -45,9 +45,15 @@ router.post('/sell', async (req, res) => {
         return res.status(400).json({ error: '缺少必要的参数' });
     }
 
+    // 验证卖出数量为正数
+    if (sharesToSell <= 0 || isNaN(sharesToSell)) {
+        return res.status(400).json({ error: '卖出数量必须是正数' });
+    }
+
     try {
+        // 查询当前股票的持仓数量和代码（增加shares字段查询）
         const [investments] = await pool.execute(
-            "SELECT symbol FROM investments WHERE name = ?",
+            "SELECT symbol, shares FROM investments WHERE name = ?",
             [stockSymbol]
         );
 
@@ -55,7 +61,12 @@ router.post('/sell', async (req, res) => {
             return res.status(404).json({ error: '未找到对应股票信息' });
         }
 
-        const stockSname = investments[0].symbol;
+        const { symbol: stockSname, shares: currentShares } = investments[0];
+
+        // 验证卖出数量不超过持仓数量
+        if (sharesToSell > currentShares) {
+            return res.status(400).json({ error: '卖出数量超过持仓数量' });
+        }
 
         const currentPrice = await getStockPrice(stockSname);
 
@@ -64,14 +75,25 @@ router.post('/sell', async (req, res) => {
         }
 
         const transactionAmount = currentPrice * sharesToSell;
+        const remainingShares = currentShares - sharesToSell;
 
-        await pool.execute(
-            `UPDATE investments 
-             SET shares = shares - ?, last_updated = CURRENT_TIMESTAMP 
-             WHERE name = ?`,
-            [sharesToSell, stockSymbol]
-        );
+        if (remainingShares === 0) {
+            // 全部卖出，删除记录
+            await pool.execute(
+                "DELETE FROM investments WHERE name = ?",
+                [stockSymbol]
+            );
+        } else {
+            // 部分卖出，更新持仓
+            await pool.execute(
+                `UPDATE investments 
+                 SET shares = ?, last_updated = CURRENT_TIMESTAMP 
+                 WHERE name = ?`,
+                [remainingShares, stockSymbol]
+            );
+        }
 
+        // 更新现金账户
         await pool.execute(
             "UPDATE cash_accounts SET balance = balance + ?, last_updated = CURRENT_TIMESTAMP WHERE name = 'Fidelity Cash'",
             [transactionAmount]
@@ -83,7 +105,8 @@ router.post('/sell', async (req, res) => {
                 stockSymbol,
                 sharesSold: sharesToSell,
                 pricePerShare: currentPrice,
-                totalAmount: transactionAmount
+                totalAmount: transactionAmount,
+                remainingShares: remainingShares // 新增返回剩余数量，0表示已删除
             }
         });
 
