@@ -1,5 +1,4 @@
-mysqldump: [Warning] Using a password on the command line interface can be insecure.
--- MySQL dump 10.13  Distrib 9.4.0, for Linux (aarch64)
+--- MySQL dump 10.13  Distrib 9.4.0, for Linux (aarch64)
 --
 -- Host: localhost    Database: portfolio
 -- ------------------------------------------------------
@@ -19,6 +18,7 @@ mysqldump: [Warning] Using a password on the command line interface can be insec
 --
 -- Table structure for table `cash_accounts`
 --
+use `portfolio`;
 
 DROP TABLE IF EXISTS `cash_accounts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

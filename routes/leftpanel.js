@@ -8,6 +8,7 @@ const stockService = require('../services/stockService');
 router.get('/cash', async (req, res) => {
     try {
         const [rows] = await db.pool.query('SELECT * FROM cash_accounts');
+        console.log(`returning ${rows.length} cash accounts from database`);
         res.json(rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -22,6 +23,8 @@ router.get('/investments', async (req, res) => {
 
         const symbols = rows.map(row => row.symbol).flat();
         // use stockService to get current prices
+        console.log(`Starting to fetch current prices for investments:`);
+
         const symbolPricesMap = await stockService.fetchPricesBySymbol(symbols);
 
         // change the rows's total_value to current price * shares
@@ -33,7 +36,7 @@ router.get('/investments', async (req, res) => {
                 rows[index].total_value = total_value;
             }
         });
-
+        
         res.json(rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -44,7 +47,7 @@ router.get('/investments', async (req, res) => {
 router.get('/investments/symbols', async (req, res) => {
     try {
         const { pool } = require('../config/db');
-        const [results] = await pool.execute('SELECT name FROM investments');
+        const [results] = await db.pool.execute('SELECT name FROM investments');
         res.json(results);
     } catch (err) {
         res.status(500).json({ error: err.message });

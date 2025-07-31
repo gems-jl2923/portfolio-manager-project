@@ -5,142 +5,107 @@ const SYMBOL_LIST_API = `https://finnhub.io/api/v1/stock/symbol?exchange=US&toke
 const QUOTE_API = (symbol) => `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`;
 
 // Define the cached stock symbols
-let cachedSymbols = null;
+let cachedSymbolMap = null;
 
-async function isValidSymbol(symbol) {
-  if (!cachedSymbols) {
+async function getSymbolMap() {
+  if (!cachedSymbolMap) {
     const response = await fetch(SYMBOL_LIST_API);
     const data = await response.json();
 
-    if (!Array.isArray(data)) return false;
+    if (!Array.isArray(data)) return null;
 
-    cachedSymbols = new Set(data.map(item => item.symbol));
-  }
-
-  return cachedSymbols.has(symbol);
-}
-
-// Function of outputting all stocks symbols and current price of each stock 
-exports.getStockInfo = async (req, res) => {
-    try {
-      // Get stock symbol list
-      const response = await fetch(SYMBOL_LIST_API);
-      const data = await response.json();
-  
-      if (!Array.isArray(data)) {
-        return res.status(500).json({ error: 'Invalid data from symbol list API' });
+    // 构造 Map：symbol -> name
+    cachedSymbolMap = new Map();
+    data.forEach(item => {
+      if (item.symbol && item.description) {
+        cachedSymbolMap.set(item.symbol, item.description);
       }
-  
-      const symbols = data.slice(0, 10).map(item => item.symbol).filter(Boolean);
-  
-      const stockPrices = {};
-  
-      // Fetch stock price for each symbol  
-      const fetches = symbols.map(async (symbol) => {
-        try {
-          const quoteRes = await fetch(QUOTE_API(symbol));
-          const quoteData = await quoteRes.json();
-  
-          if (quoteData && typeof quoteData.c === 'number') {
-            stockPrices[symbol] = quoteData.c;
-          }
-        } catch (e) {
-          console.warn(`Failed to fetch price for ${symbol}`);
-        }
-      });
-  
-      await Promise.all(fetches);
-  
-      return res.json(stockPrices);
-  
-    } catch (err) {
-      console.error('Fetch stock info failed:', err);
-      return res.status(500).json({ error: 'Failed to fetch stock info' });
-    }
-  };
+    });
+  }
+  return cachedSymbolMap;
+}
 
 
 // Function of buy stocks
 exports.buyStock = async (req, res) => {
-    const { symbol, shares } = req.body;
+  const { symbol, shares } = req.body;
 
-    if (!symbol || typeof shares !== 'number' || shares <= 0) {
-        return res.status(400).json({ error: 'Invalid parameters: symbol or shares' });
-      }
-    
-    try{
-        const valid = await isValidSymbol(symbol);
-        if (!valid) {
-          return res.status(400).json({ error: `Invalid symbol: ${symbol} does not exist.` });
-        }
+  if (!symbol || typeof shares !== 'number' || shares <= 0) {
+    return res.status(400).json({ error: 'Invalid parameters: symbol or shares' });
+  }
 
-        const quoteRes = await fetch(QUOTE_API(symbol));
-        const quoteData = await quoteRes.json();
-
-        if (!quoteData || typeof quoteData.c !== 'number') {
-            return res.status(400).json({ error: `Failed to get price for ${symbol}` });
-          }
-      
-        const currentPrice = quoteData.c;
-        const thisValue = parseFloat((currentPrice * shares).toFixed(2));
-
-        // Check if the stock already exists in the database
-        const [rows] = await pool.query(
-            'SELECT shares, total_value FROM investments WHERE name = ?',
-            [symbol]);
-
-        let result;
-
-        if (rows.length > 0) {
-            // If exists, update shares and total_value
-            const existingShares = rows[0].shares;
-            const existingValue = parseFloat(rows[0].total_value);
-            const newShares = existingShares + shares;
-            const newValue = (existingValue + thisValue).toFixed(2);
-
-            [result] = await pool.query(
-                'UPDATE investments SET shares = ?, total_value = ?, last_updated = NOW() WHERE name = ?',
-                [newShares, newValue, symbol]
-            );
-        } else {
-            // If not exists, insert new record
-            [result] = await pool.query(
-                'INSERT INTO investments (name, shares, total_value) VALUES (?, ?, ?)',
-                [symbol, shares, thisValue]
-            );
-
-            return res.status(201).json({
-                success: true,
-                message: `Purchased ${shares} shares of ${symbol} at $${currentPrice}`,
-                investment_id: result.insertId
-              });
-        }
-
-    } catch (error) {
-        console.error('Buy stock failed:', error);
-        return res.status(500).json({ error: 'Failed to buy stock' });
+  try {
+    const symbolMap = await getSymbolMap();
+    if (!symbolMap || !symbolMap.has(symbol)) {
+      return res.status(400).json({ error: `Invalid symbol: ${symbol} does not exist.` });
     }
-}
 
+    const stockName = symbolMap.get(symbol); // Stock Description
 
-// Function of outputting all stocks symbols and store in a List
-exports.getStockList = async (req, res) => {
-    try {
-        const response = await fetch(SYMBOL_LIST_API);
-        const data = await response.json();
-
-        if (!Array.isArray(data)) {
-            return res.status(500).json({ error: 'Invalid data format from external API' });
-          }
-
-        const symbolList = data.map(item => item.symbol).filter(Boolean);
-          
-        return res.json({ stock_list: symbolList });
-
-    } catch (error) {
-        console.error('Fetch stock list failed:', error);
-        return res.status(500).json({ error: 'Failed to fetch stock list' });
+    // Fetch current price
+    const quoteRes = await fetch(QUOTE_API(symbol));
+    const quoteData = await quoteRes.json();
+    if (!quoteData || typeof quoteData.c !== 'number') {
+      return res.status(400).json({ error: `Failed to get price for ${symbol}` });
     }
+
+    const currentPrice = quoteData.c;
+    const cost = parseFloat((currentPrice * shares).toFixed(2));
+
+    // Query 
+    const [[cashRow]] = await pool.query(
+      'SELECT balance FROM cash_accounts WHERE id = ?',
+      [1]
+    );
+
+    if (!cashRow) {
+      return res.status(500).json({ error: 'Cash account not found' });
+    }
+
+    const currentBalance = parseFloat(cashRow.balance);
+    if (cost > currentBalance) {
+      return res.status(400).json({ error: 'Insufficient balance' });
+    }
+
+    // Query if stock exists
+    const [rows] = await pool.query(
+      'SELECT shares FROM investments WHERE symbol = ?',
+      [symbol]
+    );
+
+    let result;
+    if (rows.length > 0) {
+      const existingShares = rows[0].shares;
+      const newShares = existingShares + shares;
+
+      [result] = await pool.query(
+        'UPDATE investments SET shares = ?, last_updated = NOW() WHERE symbol = ?',
+        [newShares, symbol]
+      );
+    } else {
+      [result] = await pool.query(
+        'INSERT INTO investments (name, symbol, shares) VALUES (?, ?, ?)',
+        [stockName, symbol, shares]
+      );
+    }
+
+    // Update balance
+    await pool.query(
+      'UPDATE cash_accounts SET balance = balance - ?, last_updated = NOW() WHERE id = ?',
+      [cost, 1]
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Purchased ${shares} shares of ${symbol} at $${currentPrice}`,
+      cost,
+      remaining_balance: (currentBalance - cost).toFixed(2)
+    });
+
+  } catch (err) {
+    console.error('Buy stock failed:', err);
+    return res.status(500).json({ error: 'Failed to buy stock' });
+  }
 };
 
 
