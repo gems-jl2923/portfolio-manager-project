@@ -22,14 +22,11 @@ router.get('/investments', async (req, res) => {
 
         const symbols = rows.map(row => row.symbol).flat();
 
-        // use stockService to get current prices
-        console.log(`Starting to fetch current prices for investments:`);
+       
 
-        const symbolPricesMap = await stockService.fetchPricesBySymbol(symbols, API_KEY="d25hjq9r01qns40f00agd25hjq9r01qns40f00b0");
-        
         // change the rows's total_value to current price * shares
         symbols.forEach((symbol, index) => {
-            const currentPrice = symbolPricesMap[symbol];
+            const currentPrice = req.app.locals.symbolsPricesMap[symbol];
             if (currentPrice >= 0) {
                 const total_value = currentPrice * rows[index].shares;
                 rows[index].total_value = total_value;
