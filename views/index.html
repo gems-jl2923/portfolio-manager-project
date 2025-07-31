@@ -172,8 +172,10 @@
                 }
             });
 
+            let cashTotal = 0;
+            let investmentTotal = 0;
+
             // Cash section
-            let total = 0;
             fetch('/api/left/cash')
                 .then(res => res.json())
                 .then(data => {
@@ -181,17 +183,17 @@
                     container.innerHTML = '';
                     data.forEach(item => {
                         const val = parseFloat(item.balance);
-                        total += val;
+                        cashTotal += val;
                         container.insertAdjacentHTML('beforeend', `
-                            <div>
-                                <p class="font-medium">${item.name}</p>
-                                <div class="flex justify-between text-gray-500">
-                                    <span>$${val.toFixed(2)}</span>
-                                    <span>${formatTimeAgo(item.last_updated)}</span>
-                                </div>
-                            </div>`);
+                <div>
+                    <p class="font-medium">${item.name}</p>
+                    <div class="flex justify-between text-gray-500">
+                        <span>$${val.toFixed(2)}</span>
+                        <span>${formatTimeAgo(item.last_updated)}</span>
+                    </div>
+                </div>`);
                     });
-                    document.getElementById('networth-total-left').textContent = '$' + total.toFixed(2);
+                    updateNetWorthLeft();
                 });
 
             // Investment section
@@ -202,30 +204,42 @@
                     container.innerHTML = '';
                     data.forEach(item => {
                         const val = parseFloat(item.total_value);
-                        total += val;
+                        investmentTotal += val;
                         container.insertAdjacentHTML('beforeend', `
-                            <div>
-                                <p class="font-medium">${item.name}</p>
-                                <div class="flex justify-between text-gray-500">
-                                    <span>$${val.toFixed(2)} (${item.shares} shares)</span>
-                                    <span>${formatTimeAgo(item.last_updated)}</span>
-                                </div>
-                            </div>`);
+                <div>
+                    <p class="font-medium">${item.name}</p>
+                    <div class="flex justify-between text-gray-500">
+                        <span>$${val.toFixed(2)} (${item.shares} shares)</span>
+                        <span>${formatTimeAgo(item.last_updated)}</span>
+                    </div>
+                </div>`);
                     });
-                    document.getElementById('networth-total-left').textContent = '$' + total.toFixed(2);
+                    updateNetWorthLeft();
+                });
 
+            function updateNetWorthLeft() {
+                const total = cashTotal + investmentTotal;
+                document.getElementById('networth-total-left').textContent =
+                    '$' + total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+
+            // Populate holdings in right panel
+            fetch('/api/left/investments')
+                .then(res => res.json())
+                .then(data => {
                     const holdingsContainer = document.getElementById('holdingsList');
                     holdingsContainer.innerHTML = '';
                     data.forEach(item => {
                         holdingsContainer.insertAdjacentHTML('beforeend', `
-                            <li class="py-2">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-medium text-gray-800">${item.name}</span>
-                                    <span class="text-sm text-gray-500">${item.shares} shares</span>
-                                </div>
-                            </li>`);
+      <li class="py-2">
+        <div class="flex justify-between items-center">
+          <span class="font-medium text-gray-800">${item.name}</span>
+          <span class="text-sm text-gray-500">${item.shares} shares</span>
+        </div>
+      </li>`);
                     });
                 });
+
 
             // Buy Form
             document.getElementById('buyForm').addEventListener('submit', async (e) => {
