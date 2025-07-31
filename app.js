@@ -19,8 +19,12 @@ app.use('/api/portfolio', portfolioRoutes);
 app.use('/', portfolioRoutes);
 app.use('/api/sellstock', sellStockRoutes);
 
+
+const API_KEY = 'd25hsphr01qns40f17qgd25hsphr01qns40f17r0';
+const SYMBOL_LIST_API = `https://finnhub.io/api/v1/stock/symbol?exchange=US&token=${API_KEY}`;
 // 初始化 app.locals，避免 undefined
 app.locals.symbolsPricesMap = {};
+app.locals.symbolMap = {};
 
 async function getwghatevr() {
     try {
@@ -38,10 +42,25 @@ async function getwghatevr() {
 
         const pricesMap = await stockService.fetchPricesBySymbol(
             symbols,
-            "d25hsd9r01qns40f15vgd25hsd9r01qns40f1600"  // 注意：不要写 API_KEY =
+            "d25hsd9r01qns40f15vgd25hsd9r01qns40f1600"
         );
 
+        const response = await fetch(SYMBOL_LIST_API);
+        const data = await response.json();
+
+        // 构造 Map：symbol -> name
+        cachedSymbolMap = new Map();
+        console.log(`Found ${data.length} symbols in API response. Constructing symbol map...`);
+        data.forEach(item => {
+            if (item.symbol && item.description) {
+                console.log(`Fetching symbol: ${item.symbol} with description: ${item.description}`);
+                cachedSymbolMap.set(item.symbol, item.description);
+            }
+        });
+
         app.locals.symbolsPricesMap = pricesMap;
+        app.locals.symbolMap = cachedSymbolMap;
+        console.log(`✅ Successfully loaded ${Object.keys(cachedSymbolMap).length} symbols.`);
         console.log(`✅ Successfully loaded ${Object.keys(pricesMap).length} prices.`);
     } catch (err) {
         console.error(`❌ Error in getwghatevr: ${err.message}`);
@@ -63,7 +82,7 @@ async function startServer() {
             } catch (err) {
                 console.error(`📌 Auto-update failed: ${err.message}`);
             }
-        }, 5*60 * 1000); 
+        }, 5 * 60 * 1000);
 
         // ✅ 3. 最后启动服务器
         const PORT = 3000;

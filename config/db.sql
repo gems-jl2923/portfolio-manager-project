@@ -50,27 +50,12 @@ CREATE TABLE cash_accounts (
     last_updated DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE investments (
-    id INT AUTO_INCREMENT UNIQUE,
-    name VARCHAR(100) NOT NULL PRIMARY KEY,
-    shares INT NOT NULL,
-    symbol VARCHAR(100) NOT NULL,
-    last_updated DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
 -- Cash
 INSERT INTO cash_accounts (name, balance) VALUES
 ('Fidelity Cash', 2291.90),
 ('Wells Fargo (Checking)', 309.13),
 ('Wells Fargo (Savings)', 2000.67);
 
-
--- select * from cash_accounts;
--- select * from investments;
-
--- UPDATE investments
--- SET total_value = 6500.00, shares = 30, last_updated = NOW()
--- WHERE id = 1;
 
 CREATE TABLE stock (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -82,3 +67,23 @@ INSERT INTO stock (name) VALUES
 ('dexter'),
 ('wss'),
 ('hungry');
+
+
+DROP TABLE IF EXISTS `investments`;
+
+CREATE TABLE `investments` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `shares` int NOT NULL,
+  `symbol` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_updated` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`name`),
+  UNIQUE KEY `id` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+LOCK TABLES `investments` WRITE;
+
+INSERT INTO `investments` VALUES (9,'ATLANTIC UNION BANKSHARES CO',9782,'AUB','2025-07-30 05:07:42'),(4,'CME GROUP INC',5917,'CME','2025-07-30 05:07:42'),(7,'ISHARES IBONDS 2029 TM HY IN',5123,'IBHI','2025-07-30 05:07:42'),(8,'KRANESHARES MSCI ONE BELT ON',4548,'OBOR','2025-07-30 05:07:42'),(2,'NET POWER INC',6553,'NPWR','2025-07-30 05:07:41'),(5,'PERIMETER ACQUISITION CORP I',9247,'PMTRU','2025-07-30 05:07:42'),(6,'PIMCO RAFI DYNAMIC MULTI-FAC',4929,'MFUS','2025-07-30 05:07:42'),(10,'RHI MAGNESITA NV',1453,'RMGNF','2025-07-30 05:07:42'),(1,'SOUTHERN MICHIGAN BANCORP',5095,'SOMC','2025-07-30 05:07:41'),(3,'TARKU RESOURCES LTD',4247,'TRKUF','2025-07-30 05:07:42');
+
+UNLOCK TABLES;

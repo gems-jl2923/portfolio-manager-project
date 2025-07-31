@@ -1,29 +1,18 @@
-const {pool} = require('../config/db');
+const { pool } = require('../config/db');
+const API_KEY = 'd25hsphr01qns40f17qgd25hsphr01qns40f17r0';
 
-const API_KEY = 'd25ht1pr01qns40f18v0d25ht1pr01qns40f18vg';
-const SYMBOL_LIST_API = `https://finnhub.io/api/v1/stock/symbol?exchange=US&token=${API_KEY}`;
+
 const QUOTE_API = (symbol) => `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${API_KEY}`;
 
 // Define the cached stock symbols
 let cachedSymbolMap = null;
 
-async function getSymbolMap() {
-  if (!cachedSymbolMap) {
-    const response = await fetch(SYMBOL_LIST_API);
-    const data = await response.json();
+// async function getSymbolMap() {
+//   if (!cachedSymbolMap) {
 
-    if (!Array.isArray(data)) return null;
-
-    // 构造 Map：symbol -> name
-    cachedSymbolMap = new Map();
-    data.forEach(item => {
-      if (item.symbol && item.description) {
-        cachedSymbolMap.set(item.symbol, item.description);
-      }
-    });
-  }
-  return cachedSymbolMap;
-}
+//   }
+//   return cachedSymbolMap;
+// }
 
 
 // Function of buy stocks
@@ -35,24 +24,40 @@ exports.buyStock = async (req, res) => {
   }
 
   try {
-    const symbolMap = await getSymbolMap();
+    const symbolMap = req.app.locals.symbolMap;
     if (!symbolMap || !symbolMap.has(symbol)) {
       return res.status(400).json({ error: `Invalid symbol: ${symbol} does not exist.` });
     }
 
     const stockName = symbolMap.get(symbol); // Stock Description
 
-    // Fetch current price
-    const quoteRes = await fetch(QUOTE_API(symbol));
-    const quoteData = await quoteRes.json();
-    if (!quoteData || typeof quoteData.c !== 'number') {
-      return res.status(400).json({ error: `Failed to get price for ${symbol}` });
+    let cost = 0;
+    let currentPrice = 0;
+    if (req.app.locals.symbolsPricesMap[symbol]) {
+      // Use cached price
+      currentPrice = req.app.locals.symbolsPricesMap[symbol];
+      cost = parseFloat((currentPrice * shares).toFixed(2));
+
+      console.log(`Using cached price for ${symbol}: $${currentPrice}`);
+      console.log(`Total cost for ${shares} shares: $${cost}`);
+
+      if (isNaN(cost) || cost <= 0) {
+        return res.status(400).json({ error: `Invalid cost calculation for ${symbol}` });
+      }
+    } else {
+      // Fetch current price
+      const quoteRes = await fetch(QUOTE_API(symbol));
+      const quoteData = await quoteRes.json();
+      if (!quoteData || typeof quoteData.c !== 'number') {
+        return res.status(400).json({ error: `Failed to get price for ${symbol}` });
+      }
+
+      currentPrice = quoteData.c;
+      cost = parseFloat((currentPrice * shares).toFixed(2));
+
+      req.app.locals.symbolsPricesMap[symbol] = currentPrice; // Update the price in the map
+
     }
-
-    const currentPrice = quoteData.c;
-    const cost = parseFloat((currentPrice * shares).toFixed(2));
-
-    req.app.locals.symbolsPricesMap[symbol] = currentPrice; // Update the price in the map
 
     // Query 
     const [[cashRow]] = await pool.query(
