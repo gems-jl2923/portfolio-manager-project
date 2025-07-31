@@ -52,7 +52,7 @@ exports.buyStock = async (req, res) => {
     const currentPrice = quoteData.c;
     const cost = parseFloat((currentPrice * shares).toFixed(2));
 
-    req.app.locals.symbolPricesMap[symbol] = currentPrice; // Update the price in the map
+    req.app.locals.symbolsPricesMap[symbol] = currentPrice; // Update the price in the map
 
     // Query 
     const [[cashRow]] = await pool.query(

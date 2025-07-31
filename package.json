@@ -2,8 +2,9 @@
   "name": "portfolio-manager",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
-    "test": "node app.js",
+    "dev": "nodemon app.js",
     "start": "node app.js"
   },
   "keywords": [],

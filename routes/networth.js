@@ -7,7 +7,7 @@ const stockService = require('../services/stockService');
 // GET /api/networth
 router.get('/', async (req, res) => {
     try {
-        // table net_worth has columns: date, net_worth
+        // table net_worth has columns: date, net_worthf
         const [rows] = await db.pool.query('SELECT date, net_worth FROM net_worth ORDER BY date ASC');
         console.log(`Returning ${rows.length} net worth records from database`);
 

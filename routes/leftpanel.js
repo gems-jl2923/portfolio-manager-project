@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/db'); // 使用的是 mysql2/promise
-const stockService = require('../services/stockService');
+// const stockService = require('../services/stockService');
 
 // 获取 Cash 数据
 router.get('/cash', async (req, res) => {
@@ -21,8 +21,6 @@ router.get('/investments', async (req, res) => {
         const [rows] = await db.pool.query('SELECT * FROM investments');
 
         const symbols = rows.map(row => row.symbol).flat();
-
-       
 
         // change the rows's total_value to current price * shares
         symbols.forEach((symbol, index) => {
