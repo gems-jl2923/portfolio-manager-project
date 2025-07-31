@@ -15,7 +15,6 @@ router.get('/', async (req, res) => {
         yesterdayObj.setDate(yesterdayObj.getDate() - 1);
         const yesterday = yesterdayObj.toISOString().split('T')[0];
 
-        // 提前声明
         const [investments_rows] = await db.pool.query('SELECT shares, symbol FROM investments');
         const symbols = investments_rows.map(row => row.symbol);
         if (rows.length === 0 || rows[rows.length - 1].date.toLocaleDateString('sv-SE') < yesterday) {
@@ -42,10 +41,12 @@ router.get('/', async (req, res) => {
             console.log(`Inserted new row for yesterday: ${yesterday}, net_worth: ${yesterdayNetWorth.toFixed(2)}`);
         }
 
+
         // calculate today value
         console.log(`Starting to fetch current prices for investments: ${symbols.join(', ')}`);
         // fetch today's prices for all symbols in investments
         const symbolPricesMap = await stockService.fetchPricesBySymbol(symbols);
+
         // get today date
         const today = new Date().toISOString().split('T')[0];
 
@@ -59,8 +60,8 @@ router.get('/', async (req, res) => {
             }
         });
         rows.push({ date: today, net_worth: todayNetWorth.toFixed(2) }); // 添加新插入的行到结果中
-
         res.json(rows);
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Database error' });
