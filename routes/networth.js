@@ -41,18 +41,12 @@ router.get('/', async (req, res) => {
             console.log(`Inserted new row for yesterday: ${yesterday}, net_worth: ${yesterdayNetWorth.toFixed(2)}`);
         }
 
-
-        // calculate today value
-        console.log(`Starting to fetch current prices for investments: ${symbols.join(', ')}`);
-        // fetch today's prices for all symbols in investments
-        const symbolPricesMap = await stockService.fetchPricesBySymbol(symbols, API_KEY="d25hq21r01qns40f0rl0d25hq21r01qns40f0rlg");
-
         // get today date
         const today = new Date().toISOString().split('T')[0];
 
         let todayNetWorth = 0;
         investments_rows.forEach(row => {
-            const todayPrice = symbolPricesMap[row.symbol];
+            const todayPrice = req.app.locals.symbolsPricesMap[row.symbol];
             if (todayPrice) {
                 todayNetWorth += todayPrice * row.shares;
             }
