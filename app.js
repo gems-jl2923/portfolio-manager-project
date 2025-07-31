@@ -38,7 +38,7 @@ async function getwghatevr() {
 
         const pricesMap = await stockService.fetchPricesBySymbol(
             symbols,
-            "d25hjq9r01qns40f00agd25hjq9r01qns40f00b0"  // 注意：不要写 API_KEY =
+            "d25hsd9r01qns40f15vgd25hsd9r01qns40f1600"  // 注意：不要写 API_KEY =
         );
 
         app.locals.symbolsPricesMap = pricesMap;
@@ -49,22 +49,21 @@ async function getwghatevr() {
     }
 }
 
-// ✅ 关键：使用 async 函数控制执行顺序
 async function startServer() {
     try {
         // ✅ 1. 等待首次数据加载完成
         await getwghatevr();
         console.log('✅ Initial price map loaded. Starting server...');
 
-        // ✅ 2. 启动定时更新（每分钟）
-        setInterval(async () => {
-            try {
-                await getwghatevr();
-                console.log(`🔄 Price map refreshed.`);
-            } catch (err) {
-                console.error(`📌 Auto-update failed: ${err.message}`);
-            }
-        }, 60 * 1000); // 每分钟更新一次（你写的是 60*1000，确实是每分钟）
+        // // ✅ 2. 启动定时更新（每分钟）
+        // setInterval(async () => {
+        //     try {
+        //         await getwghatevr();
+        //         console.log(`🔄 Price map refreshed.`);
+        //     } catch (err) {
+        //         console.error(`📌 Auto-update failed: ${err.message}`);
+        //     }
+        // }, 5*60 * 1000); 
 
         // ✅ 3. 最后启动服务器
         const PORT = 3000;
