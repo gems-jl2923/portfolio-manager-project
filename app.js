@@ -55,15 +55,15 @@ async function startServer() {
         await getwghatevr();
         console.log('✅ Initial price map loaded. Starting server...');
 
-        // // ✅ 2. 启动定时更新（每分钟）
-        // setInterval(async () => {
-        //     try {
-        //         await getwghatevr();
-        //         console.log(`🔄 Price map refreshed.`);
-        //     } catch (err) {
-        //         console.error(`📌 Auto-update failed: ${err.message}`);
-        //     }
-        // }, 5*60 * 1000); 
+        // ✅ 2. 启动定时更新（每分钟）
+        setInterval(async () => {
+            try {
+                await getwghatevr();
+                console.log(`🔄 Price map refreshed.`);
+            } catch (err) {
+                console.error(`📌 Auto-update failed: ${err.message}`);
+            }
+        }, 5*60 * 1000); 
 
         // ✅ 3. 最后启动服务器
         const PORT = 3000;
