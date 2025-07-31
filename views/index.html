@@ -40,7 +40,8 @@
                     </div>
                 </div>
 
-                <div class="w-full h-72 bg-gray-50 rounded-xl p-4 border border-dashed flex items-center justify-center mt-6">
+                <div
+                    class="w-full h-72 bg-gray-50 rounded-xl p-4 border border-dashed flex items-center justify-center mt-6">
                     <canvas id="netWorthChart" class="w-full h-full max-w-3xl"></canvas>
                 </div>
 
@@ -253,6 +254,40 @@
                     alert('Error: ' + err.message);
                 }
             });
+
+            // Sell Form
+            document.getElementById('sellForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const stockSymbol = document.getElementById('sellSymbol').value;
+                const sharesToSell = parseInt(document.getElementById('sellAmount').value);
+
+                if (!stockSymbol || isNaN(sharesToSell) || sharesToSell <= 0) {
+                    alert('Please enter a valid stock and number of shares.');
+                    return;
+                }
+
+                try {
+                    const res = await fetch('/api/sell_stock/sell', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ stockSymbol, sharesToSell })
+                    });
+
+                    const result = await res.json();
+
+                    if (!res.ok || result.error) {
+                        throw new Error(result.error || 'Sell operation failed.');
+                    }
+
+                    alert(`✅ Sold ${result.details.sharesSold} shares of ${result.details.stockSymbol} at $${result.details.pricePerShare.toFixed(2)} each.\nTotal: $${result.details.totalAmount.toFixed(2)}`);
+                    document.getElementById('sellForm').reset(); // 清空表单
+                    location.reload(); // 刷新页面以更新左侧投资和现金值
+                } catch (err) {
+                    alert('❌ Error during selling: ' + err.message);
+                }
+            });
+
 
             // Sell Symbol dropdown
             fetch('/api/left/investments/symbols')
